@@ -6,7 +6,7 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -120,7 +120,7 @@ func main() {
 
 // blasting
 func blastWelcomeMessage(req BlastWelcomeMessageRequest) {
-	data := req.Users[:3]
+	data := req.Users
 	for idx, user := range data {
 		// prepare request
 		reqSendbird := SendMessageRequest{
@@ -176,7 +176,7 @@ func sendMessage(req SendMessageRequest) (res SendMessageResponse, err error) {
 
 	fmt.Println("response Status:", response.Status)
 	// fmt.Println("response Headers:", response.Header)
-	body, _ := ioutil.ReadAll(response.Body)
+	body, _ := io.ReadAll(response.Body)
 	// fmt.Println("response Body:", string(body))
 
 	err = json.Unmarshal(body, &res)
@@ -195,7 +195,7 @@ func createLogFile(csvFile string) (res *os.File) {
 	_ = os.Mkdir(logDir, os.ModePerm)
 
 	ts := time.Now().Format("2006-01-02-15-04")
-	strTs := fmt.Sprintf("%s", ts)
+	strTs := fmt.Sprintf("%v", ts)
 	outFile := logDir + "/input_" + csvFile + "_" + strTs + ".log"
 
 	res, err := os.OpenFile(outFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
