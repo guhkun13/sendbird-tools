@@ -39,8 +39,8 @@ type ConfigEnv struct {
 	SendbirdAPIToken string
 }
 type MigratedUserSendbird struct {
-	UserID   string
-	FullName string
+	UserID string
+	// FullName string
 }
 
 type MigratedUserSendbirdList []MigratedUserSendbird
@@ -78,13 +78,11 @@ type SendMessageRequest struct {
 }
 
 type SendMessageResponse struct {
-	Status     string `json:"status"`
-	Type       string `json:"type"`
-	ChannelURL string `json:"channel_url"`
-	CustomType string `json:"custom_type"`
-	MessageID  int64  `json:"message_id"`
-	Message    string `json:"message"`
-	CreatedAt  int64  `json:"created_at"`
+	Status string `json:"status"`
+	// Type       string `json:"type"`
+	// ChannelURL string `json:"channel_url"`
+	// MessageID  int64  `json:"message_id"`
+	// CreatedAt  int64  `json:"created_at"`
 }
 
 // main
@@ -122,6 +120,7 @@ func main() {
 func blastWelcomeMessage(req BlastWelcomeMessageRequest) {
 	data := req.Users
 	for idx, user := range data {
+		fmt.Print("idx: ", idx)
 		// prepare request
 		reqSendbird := SendMessageRequest{
 			MessageType:         "ADMM",
@@ -146,16 +145,17 @@ func blastWelcomeMessage(req BlastWelcomeMessageRequest) {
 			Response: res,
 		}
 		writeLog(dataLog, req.LogFile)
+
+		// time.Sleep(time.Millisecond * 200)
 	}
 }
 
 func sendMessage(req SendMessageRequest) (res SendMessageResponse, err error) {
 	conf := getConfigVariable()
-	fmt.Println("conf = ", conf)
 
 	postUrl := conf.SendbirdBaseURL + SendbirdEndpointSendMessage
 	postUrl = strings.Replace(postUrl, "{channel_url}", req.ChannelURL, -1)
-	fmt.Println("||| Sending to = ", postUrl)
+	fmt.Print("||| Send to = ", req.ChannelURL)
 
 	jsonData, err := json.Marshal(req)
 	payload := bytes.NewBuffer(jsonData)
@@ -174,7 +174,7 @@ func sendMessage(req SendMessageRequest) (res SendMessageResponse, err error) {
 	}
 	defer response.Body.Close()
 
-	fmt.Println("response Status:", response.Status)
+	fmt.Println("||| status:", response.Status)
 	// fmt.Println("response Headers:", response.Header)
 	body, _ := io.ReadAll(response.Body)
 	// fmt.Println("response Body:", string(body))
@@ -228,9 +228,10 @@ func createUserList(data [][]string) (res MigratedUserSendbirdList) {
 			for j, field := range line {
 				if j == 0 {
 					rec.UserID = field
-				} else if j == 1 {
-					rec.FullName = field
 				}
+				// else if j == 1 {
+				// 	rec.FullName = field
+				// }
 			}
 			res = append(res, rec)
 		}
