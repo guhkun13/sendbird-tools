@@ -12,6 +12,8 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"github.com/joho/godotenv"
 )
 
 // DTO
@@ -24,15 +26,18 @@ Kini, kamu makin mudah dapatkan info menarik terkait Evermos. Info yang akan did
 Salam Sungkem dari Kami,
 Seluruh Tim Evermos`
 
-const ProfileURL string = "https://evermos.com/placeholder-profile.png"
-
-var (
-	SendbirdBaseURL  string = "https://api-6F112124-8DB8-4042-89D0-BDC2D2DB62D9.sendbird.com"
-	SendbirdAPIToken string = "93158cce2158d13cf10435fdd5d391e935bb9b22"
+const (
+	ProfileURL              string = "https://evermos.com/placeholder-profile.png"
+	Config_SendbirdBaseURL  string = "SENDBIRD.BASE_URL"
+	Config_SendbirdAPIToken string = "SENDBIRD.API_TOKEN"
 )
 
 var SendbirdEndpointSendMessage string = "/v3/group_channels/{channel_url}/messages"
 
+type ConfigEnv struct {
+	SendbirdBaseURL  string
+	SendbirdAPIToken string
+}
 type MigratedUserSendbird struct {
 	UserID   string
 	FullName string
@@ -145,7 +150,10 @@ func blastWelcomeMessage(req BlastWelcomeMessageRequest) {
 }
 
 func sendMessage(req SendMessageRequest) (res SendMessageResponse, err error) {
-	postUrl := SendbirdBaseURL + SendbirdEndpointSendMessage
+	conf := getConfigVariable()
+	fmt.Println("conf = ", conf)
+
+	postUrl := conf.SendbirdBaseURL + SendbirdEndpointSendMessage
 	postUrl = strings.Replace(postUrl, "{channel_url}", req.ChannelURL, -1)
 	fmt.Println("||| Sending to = ", postUrl)
 
@@ -157,7 +165,7 @@ func sendMessage(req SendMessageRequest) (res SendMessageResponse, err error) {
 		panic(err)
 	}
 	request.Header.Set("Content-Type", "application/json; charset=UTF-8")
-	request.Header.Set("Api-Token", SendbirdAPIToken)
+	request.Header.Set("Api-Token", conf.SendbirdAPIToken)
 
 	client := &http.Client{}
 	response, error := client.Do(request)
@@ -229,4 +237,18 @@ func createUserList(data [][]string) (res MigratedUserSendbirdList) {
 	}
 
 	return
+}
+
+func getConfigVariable() (res ConfigEnv) {
+	err := godotenv.Load(".env")
+
+	if err != nil {
+		log.Fatalf("Error loading .env file")
+	}
+
+	return ConfigEnv{
+		SendbirdBaseURL:  os.Getenv(Config_SendbirdBaseURL),
+		SendbirdAPIToken: os.Getenv(Config_SendbirdAPIToken),
+	}
+
 }
