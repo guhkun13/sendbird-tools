@@ -12,7 +12,7 @@ import (
 )
 
 func SendMessage(req SendMessageRequest) (res SendMessageResponse, err error) {
-	conf := config.GetSendbirdConfigVariable()
+	conf := config.GetSendbirdConfig()
 
 	postUrl := conf.SendbirdBaseURL + EndpointSendMessage
 	postUrl = strings.Replace(postUrl, "{channel_url}", req.ChannelURL, -1)

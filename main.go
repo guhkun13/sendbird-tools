@@ -33,10 +33,20 @@ func main() {
 	// convert records to array of structs
 	userList := service.CreateUserList(data)
 	logFile := service.CreateLogFile(csvFile)
-	req := service.BlastWelcomeMessageRequest{
+	req := service.WorkerRequest{
 		Users:   userList,
 		LogFile: logFile,
 	}
-	service.BlastWelcomeMessage(req)
+
+	// create channel evm-info
+	service.CreateChannel(req)
+
+	// freeze channel
+	service.FreezeChannel(req)
+
+	// send welcome message
+	service.SendWelcomeMessage(req)
+
+	// close logFile
 	defer logFile.Close()
 }

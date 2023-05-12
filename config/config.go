@@ -8,26 +8,52 @@ import (
 )
 
 const (
-	ProfileURL              string = "https://evermos.com/placeholder-profile.png"
-	Config_SendbirdBaseURL  string = "SENDBIRD.BASE_URL"
-	Config_SendbirdAPIToken string = "SENDBIRD.API_TOKEN"
+	AppDelayEnabled string = "APP.DELAY.ENABLED"
+	AppDelayTime    string = "APP.DELAY.TIME"
 )
 
-type ConfigEnv struct {
+const (
+	SendbirdProfileURL string = "https://evermos.com/placeholder-profile.png"
+	SendbirdBaseURL    string = "SENDBIRD.BASE_URL"
+	SendbirdAPIToken   string = "SENDBIRD.API_TOKEN"
+)
+
+type AppConfig struct {
+	AppDelayEnabled string
+	AppDelayTime    string
+}
+
+type SendbirdConfig struct {
 	SendbirdBaseURL  string
 	SendbirdAPIToken string
 }
 
-func GetSendbirdConfigVariable() (res ConfigEnv) {
+// app config
+func GetAppConfig() (res AppConfig) {
 	err := godotenv.Load(".env")
 
 	if err != nil {
 		log.Fatalf("Error loading .env file")
 	}
 
-	return ConfigEnv{
-		SendbirdBaseURL:  os.Getenv(Config_SendbirdBaseURL),
-		SendbirdAPIToken: os.Getenv(Config_SendbirdAPIToken),
+	return AppConfig{
+		AppDelayEnabled: os.Getenv(AppDelayEnabled),
+		AppDelayTime:    os.Getenv(AppDelayTime),
+	}
+
+}
+
+// sendbirf config
+func GetSendbirdConfig() (res SendbirdConfig) {
+	err := godotenv.Load(".env")
+
+	if err != nil {
+		log.Fatalf("Error loading .env file")
+	}
+
+	return SendbirdConfig{
+		SendbirdBaseURL:  os.Getenv(SendbirdBaseURL),
+		SendbirdAPIToken: os.Getenv(SendbirdAPIToken),
 	}
 
 }

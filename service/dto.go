@@ -24,7 +24,7 @@ type SendLog struct {
 	Response interface{}
 }
 
-type BlastWelcomeMessageRequest struct {
+type WorkerRequest struct {
 	Users   MigratedUserSendbirdList
 	LogFile *os.File
 }
