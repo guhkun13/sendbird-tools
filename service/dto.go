@@ -19,6 +19,7 @@ type MigratedUserSendbird struct {
 type MigratedUserSendbirdList []MigratedUserSendbird
 
 type SendLog struct {
+	Function string
 	Index    int
 	Request  interface{}
 	Response interface{}

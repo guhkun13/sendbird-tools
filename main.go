@@ -39,10 +39,10 @@ func main() {
 	}
 
 	// create channel evm-info
-	service.CreateChannel(req)
+	service.CreateGroupChannel(req)
 
 	// freeze channel
-	service.FreezeChannel(req)
+	// service.FreezeGroupChannel(req)
 
 	// send welcome message
 	service.SendWelcomeMessage(req)
