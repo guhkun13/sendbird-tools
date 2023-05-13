@@ -85,3 +85,9 @@ type SendMessageResponse struct {
 	// MessageID  int64  `json:"message_id"`
 	// CreatedAt  int64  `json:"created_at"`
 }
+
+type HttpResponse struct {
+	Status string `json:"status"`
+	Code   int    `json:"code"`
+	Body   string `json:"body"`
+}

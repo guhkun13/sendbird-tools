@@ -38,14 +38,7 @@ func main() {
 		LogFile: logFile,
 	}
 
-	// create channel evm-info
-	service.CreateGroupChannel(req)
-
-	// freeze channel
-	// service.FreezeGroupChannel(req)
-
-	// send welcome message
-	service.SendWelcomeMessage(req)
+	service.OnboardingUser(req)
 
 	// close logFile
 	defer logFile.Close()

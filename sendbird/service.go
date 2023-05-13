@@ -28,7 +28,7 @@ func GetEndpoints() Endpoints {
 	}
 }
 
-func CreateGroupChannel(req CreateGroupChannelRequest) (res CreateGroupChannelResponse, err error) {
+func CreateGroupChannel(req CreateGroupChannelRequest) (res HttpResponse, err error) {
 	conf := config.GetSendbirdConfig()
 
 	postUrl := conf.SendbirdBaseURL + GetEndpoints().CreateGroup
@@ -52,6 +52,8 @@ func CreateGroupChannel(req CreateGroupChannelRequest) (res CreateGroupChannelRe
 	defer response.Body.Close()
 
 	fmt.Println("||| status:", response.Status)
+	fmt.Println("||| code:", response.StatusCode)
+
 	body, _ := io.ReadAll(response.Body)
 	fmt.Println("response Body:", string(body))
 
@@ -59,16 +61,19 @@ func CreateGroupChannel(req CreateGroupChannelRequest) (res CreateGroupChannelRe
 	if err != nil {
 		fmt.Println("Cannont unmarshal response")
 	}
+	res.Status = response.Status
+	res.Code = response.StatusCode
+	res.Body = string(body)
 
 	return
 }
 
-func SendMessage(req SendMessageRequest) (res SendMessageResponse, err error) {
+func SendMessage(req SendMessageRequest) (res HttpResponse, err error) {
 	conf := config.GetSendbirdConfig()
 
 	postUrl := conf.SendbirdBaseURL + GetEndpoints().SendMessage
 	postUrl = strings.Replace(postUrl, "{channel_url}", req.ChannelURL, -1)
-	fmt.Print("||| Send to = ", req.ChannelURL)
+	fmt.Printf("||| %s to = %s ", HTTP_POST, req.ChannelURL)
 
 	jsonData, err := json.Marshal(req)
 	payload := bytes.NewBuffer(jsonData)
@@ -97,6 +102,8 @@ func SendMessage(req SendMessageRequest) (res SendMessageResponse, err error) {
 		fmt.Println("Cannont unmarshal response")
 	}
 	res.Status = response.Status
+	res.Code = response.StatusCode
+	res.Body = string(body)
 
 	return
 }

@@ -28,7 +28,7 @@ func CreateLogFile(csvFile string) (res *os.File) {
 	return
 }
 
-func WriteLog(data SendLog, f *os.File) {
+func WriteLog(data HttpLog, f *os.File) {
 	dataByte, _ := json.MarshalIndent(data, "", " ")
 
 	n, err := f.Write(dataByte)
