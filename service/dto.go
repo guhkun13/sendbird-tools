@@ -18,7 +18,6 @@ const (
 
 type MigratedUserSendbird struct {
 	UserID string
-	// FullName string
 }
 
 type MigratedUserSendbirdList []MigratedUserSendbird

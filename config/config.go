@@ -7,52 +7,41 @@ import (
 	"github.com/joho/godotenv"
 )
 
-const (
+type Config struct {
+	App struct {
+		Delay struct {
+			Enabled string
+			Time    string
+		}
+	}
+	Sendbird struct {
+		BaseURL  string
+		APIToken string
+	}
+}
+
+var (
+	// app
 	AppDelayEnabled string = "APP.DELAY.ENABLED"
 	AppDelayTime    string = "APP.DELAY.TIME"
-)
-
-const (
+	// sendbird
 	SendbirdBaseURL  string = "SENDBIRD.BASE_URL"
 	SendbirdAPIToken string = "SENDBIRD.API_TOKEN"
 )
 
-type AppConfig struct {
-	AppDelayEnabled string
-	AppDelayTime    string
-}
-
-type SendbirdConfig struct {
-	SendbirdBaseURL  string
-	SendbirdAPIToken string
-}
-
-// app config
-func GetAppConfig() (res AppConfig) {
+func InitConfig() (conf Config) {
 	err := godotenv.Load(".env")
-
 	if err != nil {
 		log.Fatalf("Error loading .env file")
 	}
 
-	return AppConfig{
-		AppDelayEnabled: os.Getenv(AppDelayEnabled),
-		AppDelayTime:    os.Getenv(AppDelayTime),
-	}
+	// app
+	conf.App.Delay.Enabled = os.Getenv(AppDelayEnabled)
+	conf.App.Delay.Time = os.Getenv(AppDelayTime)
+	// sendbird
+	conf.Sendbird.BaseURL = os.Getenv(SendbirdBaseURL)
+	conf.Sendbird.APIToken = os.Getenv(SendbirdAPIToken)
 
-}
-
-// sendbirf config
-func GetSendbirdConfig() (res SendbirdConfig) {
-	err := godotenv.Load(".env")
-
-	if err != nil {
-		log.Fatalf("Error loading .env file")
-	}
-
-	return SendbirdConfig{
-		SendbirdBaseURL:  os.Getenv(SendbirdBaseURL),
-		SendbirdAPIToken: os.Getenv(SendbirdAPIToken),
-	}
+	return
 
 }

@@ -19,13 +19,13 @@ type Service interface {
 }
 
 type ServiceImpl struct {
-	Config         config.AppConfig
+	Config         config.Config
 	SendirdService sendbird.Service
 }
 
-func NewService() *ServiceImpl {
+func InitService() *ServiceImpl {
 	return &ServiceImpl{
-		Config:         config.GetAppConfig(),
-		SendirdService: sendbird.NewService(),
+		Config:         config.InitConfig(),
+		SendirdService: sendbird.InitService(),
 	}
 }

@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/guhkun13/sendbird-tools/config"
 	"github.com/guhkun13/sendbird-tools/sendbird"
 	"github.com/rs/zerolog/log"
 )
@@ -80,20 +79,14 @@ func (s *ServiceImpl) OnboardingUser(req WorkerRequest) {
 				Response: resSendMessage,
 			}
 			s.WriteLog(logSend, req.LogFile)
-			checkDelay()
 		}
 		// check for delay
-		checkDelay()
+		s.CheckDelay()
 	}
 }
 
 // ONE
 func (s *ServiceImpl) CreateGroupChannel(userID string) (req interface{}, res sendbird.HttpResponse) {
-	// funcName := "CreateGroupChannel"
-	// log.Info().
-	// 	Str("func", funcName).
-	// 	Msg("[Main Flow]")
-
 	userIDint, _ := strconv.ParseInt(userID, 10, 64)
 	reqSendbird := sendbird.CreateGroupChannelRequest{
 		Name:       "Evermos Info",
@@ -171,7 +164,7 @@ func (s *ServiceImpl) BulkCreateGroupChannel(req WorkerRequest) {
 			Response: resExt,
 		}
 		s.WriteLog(dataLog, req.LogFile)
-		checkDelay()
+		s.CheckDelay()
 	}
 }
 
@@ -190,13 +183,13 @@ func (s *ServiceImpl) BulkSendWelcomeMessage(req WorkerRequest) {
 			Response: resExt,
 		}
 		s.WriteLog(dataLog, req.LogFile)
-		checkDelay()
+		s.CheckDelay()
 	}
 }
 
-func checkDelay() {
-	isDelay, _ := strconv.ParseBool(config.GetAppConfig().AppDelayEnabled)
-	delayTime, _ := strconv.ParseInt(config.GetAppConfig().AppDelayTime, 10, 64)
+func (s *ServiceImpl) CheckDelay() {
+	isDelay, _ := strconv.ParseBool(s.Config.App.Delay.Enabled)
+	delayTime, _ := strconv.ParseInt(s.Config.App.Delay.Time, 10, 64)
 
 	if isDelay {
 		log.Info().Int64("time", delayTime).Msg("[Delay]")
