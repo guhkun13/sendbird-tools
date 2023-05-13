@@ -72,7 +72,7 @@ func CreateGroupChannel(req CreateGroupChannelRequest) (res HttpResponse, err er
 
 func FreezeGroupChannel(req FreezeGroupChannelRequest) (res HttpResponse, err error) {
 	funcName := "FreezeGroupChannel"
-	fmt.Printf(">> [%s] %s to = %s", funcName, HTTP_PUT, req.ChannelURL)
+	fmt.Printf(">> [%s] %s  to = %s", funcName, HTTP_PUT, req.ChannelURL)
 
 	conf := config.GetSendbirdConfig()
 	url := conf.SendbirdBaseURL + GetEndpoints().FreezeGroupChannel
