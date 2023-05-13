@@ -9,8 +9,7 @@ import (
 
 const logDirName = "logs"
 
-// logging
-func CreateLogFile(csvFile string) (res *os.File) {
+func (s *ServiceImpl) CreateLogFile(csvFile string) (res *os.File) {
 	// ignore the error
 	_ = os.Mkdir(logDirName, os.ModePerm)
 
@@ -28,7 +27,7 @@ func CreateLogFile(csvFile string) (res *os.File) {
 	return
 }
 
-func WriteLog(data HttpLog, f *os.File) {
+func (s *ServiceImpl) WriteLog(data HttpLog, f *os.File) {
 	dataByte, _ := json.MarshalIndent(data, "", " ")
 
 	n, err := f.Write(dataByte)

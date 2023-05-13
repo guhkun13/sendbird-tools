@@ -30,10 +30,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// convert records to array of structs
-	// userList := service.CreateUserList(data)
+	// call service
 	userList := service.NewService().CreateUserList(data)
-	logFile := service.CreateLogFile(csvFile)
+	logFile := service.NewService().CreateLogFile(csvFile)
 	req := service.WorkerRequest{
 		Users:   userList,
 		LogFile: logFile,
