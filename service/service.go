@@ -57,7 +57,6 @@ func OnboardingUser(req WorkerRequest) {
 			Response: resCreateChannel,
 		}
 		WriteLog(logCreate, req.LogFile)
-		checkDelay()
 
 		// [2] Freeze Group Channel
 		reqFreezeChannel, resFreezeChannel := FreezeGroupChannel(user.UserID)
@@ -69,7 +68,6 @@ func OnboardingUser(req WorkerRequest) {
 			Response: resFreezeChannel,
 		}
 		WriteLog(logFreeze, req.LogFile)
-		checkDelay()
 
 		// [3] Send Welcome Messsage
 		if resCreateChannel.Code == http.StatusOK {
@@ -85,6 +83,8 @@ func OnboardingUser(req WorkerRequest) {
 			WriteLog(logSend, req.LogFile)
 			checkDelay()
 		}
+		// check for delay
+		checkDelay()
 	}
 }
 
