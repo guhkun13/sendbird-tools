@@ -31,14 +31,15 @@ func main() {
 	}
 
 	// convert records to array of structs
-	userList := service.CreateUserList(data)
+	// userList := service.CreateUserList(data)
+	userList := service.NewService().CreateUserList(data)
 	logFile := service.CreateLogFile(csvFile)
 	req := service.WorkerRequest{
 		Users:   userList,
 		LogFile: logFile,
 	}
 
-	service.OnboardingUser(req)
+	service.NewService().OnboardingUser(req)
 
 	// close logFile
 	defer logFile.Close()

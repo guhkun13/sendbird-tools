@@ -17,36 +17,47 @@ const (
 	HTTP_PUT  string = "PUT"
 )
 
+type Service interface {
+	CreateGroupChannel(req CreateGroupChannelRequest) (res HttpResponse, err error)
+	FreezeGroupChannel(req FreezeGroupChannelRequest) (res HttpResponse, err error)
+	SendMessage(req SendMessageRequest) (res HttpResponse, err error)
+}
+
+type ServiceImpl struct {
+	Config    config.SendbirdConfig
+	Endpoints Endpoints
+}
 type Endpoints struct {
 	SendMessage        string
 	CreateGroupChannel string
 	FreezeGroupChannel string
 }
 
-func GetEndpoints() Endpoints {
-	return Endpoints{
-		SendMessage:        "/v3/group_channels/{channel_url}/messages",
-		CreateGroupChannel: "/v3/group_channels",
-		FreezeGroupChannel: "/v3/group_channels/{channel_url}/freeze",
+func NewService() *ServiceImpl {
+	return &ServiceImpl{
+		Config: config.GetSendbirdConfig(),
+		Endpoints: Endpoints{
+			SendMessage:        "/v3/group_channels/{channel_url}/messages",
+			CreateGroupChannel: "/v3/group_channels",
+			FreezeGroupChannel: "/v3/group_channels/{channel_url}/freeze",
+		},
 	}
 }
 
-func CreateGroupChannel(req CreateGroupChannelRequest) (res HttpResponse, err error) {
+func (s *ServiceImpl) CreateGroupChannel(req CreateGroupChannelRequest) (res HttpResponse, err error) {
 	funcName := "CreateGroupChannel"
 	fmt.Printf(">> [%s] %s to = %s", funcName, HTTP_POST, req.ChannelURL)
 
-	conf := config.GetSendbirdConfig()
-	postUrl := conf.SendbirdBaseURL + GetEndpoints().CreateGroupChannel
-
+	url := s.Config.SendbirdBaseURL + s.Endpoints.CreateGroupChannel
 	jsonData, err := json.Marshal(req)
 	payload := bytes.NewBuffer(jsonData)
 
-	request, err := http.NewRequest(HTTP_POST, postUrl, payload)
+	request, err := http.NewRequest(HTTP_POST, url, payload)
 	if err != nil {
 		panic(err)
 	}
 	request.Header.Set("Content-Type", "application/json; charset=UTF-8")
-	request.Header.Set("Api-Token", conf.SendbirdAPIToken)
+	request.Header.Set("Api-Token", s.Config.SendbirdAPIToken)
 
 	client := &http.Client{}
 	response, error := client.Do(request)
@@ -57,8 +68,6 @@ func CreateGroupChannel(req CreateGroupChannelRequest) (res HttpResponse, err er
 
 	body, _ := io.ReadAll(response.Body)
 	fmt.Printf("|| status [%d]: %s \n", response.StatusCode, response.Status)
-	// fmt.Println("response Body:", string(body))
-
 	err = json.Unmarshal(body, &res)
 	if err != nil {
 		fmt.Println("Cannont unmarshal response")
@@ -70,14 +79,12 @@ func CreateGroupChannel(req CreateGroupChannelRequest) (res HttpResponse, err er
 	return
 }
 
-func FreezeGroupChannel(req FreezeGroupChannelRequest) (res HttpResponse, err error) {
+func (s *ServiceImpl) FreezeGroupChannel(req FreezeGroupChannelRequest) (res HttpResponse, err error) {
 	funcName := "FreezeGroupChannel"
 	fmt.Printf(">> [%s] %s  to = %s", funcName, HTTP_PUT, req.ChannelURL)
 
-	conf := config.GetSendbirdConfig()
-	url := conf.SendbirdBaseURL + GetEndpoints().FreezeGroupChannel
+	url := s.Config.SendbirdBaseURL + s.Endpoints.FreezeGroupChannel
 	url = strings.Replace(url, "{channel_url}", req.ChannelURL, -1)
-
 	jsonData, err := json.Marshal(req)
 	payload := bytes.NewBuffer(jsonData)
 
@@ -86,7 +93,7 @@ func FreezeGroupChannel(req FreezeGroupChannelRequest) (res HttpResponse, err er
 		panic(err)
 	}
 	request.Header.Set("Content-Type", "application/json; charset=UTF-8")
-	request.Header.Set("Api-Token", conf.SendbirdAPIToken)
+	request.Header.Set("Api-Token", s.Config.SendbirdAPIToken)
 
 	client := &http.Client{}
 	response, error := client.Do(request)
@@ -97,7 +104,6 @@ func FreezeGroupChannel(req FreezeGroupChannelRequest) (res HttpResponse, err er
 
 	body, _ := io.ReadAll(response.Body)
 	fmt.Printf("|| status [%d]: %s \n", response.StatusCode, response.Status)
-	// fmt.Println("response Body:", string(body))
 
 	err = json.Unmarshal(body, &res)
 	if err != nil {
@@ -110,23 +116,21 @@ func FreezeGroupChannel(req FreezeGroupChannelRequest) (res HttpResponse, err er
 	return
 }
 
-func SendMessage(req SendMessageRequest) (res HttpResponse, err error) {
+func (s *ServiceImpl) SendMessage(req SendMessageRequest) (res HttpResponse, err error) {
 	funcName := "SendMessage"
 	fmt.Printf(">> [%s] %s to = %s", funcName, HTTP_POST, req.ChannelURL)
 
-	conf := config.GetSendbirdConfig()
-	postUrl := conf.SendbirdBaseURL + GetEndpoints().SendMessage
-	postUrl = strings.Replace(postUrl, "{channel_url}", req.ChannelURL, -1)
-
+	url := s.Config.SendbirdBaseURL + s.Endpoints.SendMessage
+	url = strings.Replace(url, "{channel_url}", req.ChannelURL, -1)
 	jsonData, err := json.Marshal(req)
 	payload := bytes.NewBuffer(jsonData)
 
-	request, err := http.NewRequest(HTTP_POST, postUrl, payload)
+	request, err := http.NewRequest(HTTP_POST, url, payload)
 	if err != nil {
 		panic(err)
 	}
 	request.Header.Set("Content-Type", "application/json; charset=UTF-8")
-	request.Header.Set("Api-Token", conf.SendbirdAPIToken)
+	request.Header.Set("Api-Token", s.Config.SendbirdAPIToken)
 
 	client := &http.Client{}
 	response, error := client.Do(request)
@@ -137,7 +141,6 @@ func SendMessage(req SendMessageRequest) (res HttpResponse, err error) {
 
 	body, _ := io.ReadAll(response.Body)
 	fmt.Printf("|| status [%d]: %s \n", response.StatusCode, response.Status)
-	// fmt.Println("response Body:", string(body))
 
 	err = json.Unmarshal(body, &res)
 	if err != nil {

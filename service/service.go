@@ -18,7 +18,23 @@ var (
 	FuncSendWelcomeMessage string = "SendWelcomeMessage"
 )
 
-func CreateUserList(data [][]string) (res MigratedUserSendbirdList) {
+type Service interface {
+	CreateUserList(data [][]string) (res MigratedUserSendbirdList)
+}
+
+type ServiceImpl struct {
+	Config         config.AppConfig
+	SendirdService sendbird.Service
+}
+
+func NewService() *ServiceImpl {
+	return &ServiceImpl{
+		Config:         config.GetAppConfig(),
+		SendirdService: sendbird.NewService(),
+	}
+}
+
+func (s *ServiceImpl) CreateUserList(data [][]string) (res MigratedUserSendbirdList) {
 	for i, line := range data {
 		if i > 0 { // omit header line
 			var rec MigratedUserSendbird
@@ -38,7 +54,7 @@ func CreateUserList(data [][]string) (res MigratedUserSendbirdList) {
 // [1] create channel,
 // [2] freeze channel,
 // [3] send welcome message
-func OnboardingUser(req WorkerRequest) {
+func (s *ServiceImpl) OnboardingUser(req WorkerRequest) {
 	funcName := "OnboardingUser"
 	log.Info().Str("func", funcName).Msg("[Main Flow]")
 
@@ -47,7 +63,7 @@ func OnboardingUser(req WorkerRequest) {
 		fmt.Printf("[ idx: %d | userID: %s ] \n", idx, user.UserID)
 
 		// [1] Create Group Channel
-		reqCreateChannel, resCreateChannel := CreateGroupChannel(user.UserID)
+		reqCreateChannel, resCreateChannel := s.CreateGroupChannel(user.UserID)
 
 		// save log
 		logCreate := HttpLog{
@@ -59,7 +75,7 @@ func OnboardingUser(req WorkerRequest) {
 		WriteLog(logCreate, req.LogFile)
 
 		// [2] Freeze Group Channel
-		reqFreezeChannel, resFreezeChannel := FreezeGroupChannel(user.UserID)
+		reqFreezeChannel, resFreezeChannel := s.FreezeGroupChannel(user.UserID)
 		// save log
 		logFreeze := HttpLog{
 			Index:    idx,
@@ -71,7 +87,7 @@ func OnboardingUser(req WorkerRequest) {
 
 		// [3] Send Welcome Messsage
 		if resCreateChannel.Code == http.StatusOK {
-			reqSendMessage, resSendMessage := SendWelcomeMessage(user.UserID)
+			reqSendMessage, resSendMessage := s.SendWelcomeMessage(user.UserID)
 
 			// save log
 			logSend := HttpLog{
@@ -89,7 +105,7 @@ func OnboardingUser(req WorkerRequest) {
 }
 
 // ONE
-func CreateGroupChannel(userID string) (req interface{}, res sendbird.HttpResponse) {
+func (s *ServiceImpl) CreateGroupChannel(userID string) (req interface{}, res sendbird.HttpResponse) {
 	// funcName := "CreateGroupChannel"
 	// log.Info().
 	// 	Str("func", funcName).
@@ -108,7 +124,7 @@ func CreateGroupChannel(userID string) (req interface{}, res sendbird.HttpRespon
 
 	// send request
 	req = reqSendbird
-	res, err := sendbird.CreateGroupChannel(reqSendbird)
+	res, err := s.SendirdService.CreateGroupChannel(reqSendbird)
 	if err != nil {
 		fmt.Printf("err: %v \n", err)
 	}
@@ -116,7 +132,7 @@ func CreateGroupChannel(userID string) (req interface{}, res sendbird.HttpRespon
 	return
 }
 
-func FreezeGroupChannel(userID string) (req interface{}, res sendbird.HttpResponse) {
+func (s *ServiceImpl) FreezeGroupChannel(userID string) (req interface{}, res sendbird.HttpResponse) {
 	reqSendbird := sendbird.FreezeGroupChannelRequest{
 		ChannelURL: "evm_info_" + userID,
 		Freeze:     true,
@@ -124,7 +140,7 @@ func FreezeGroupChannel(userID string) (req interface{}, res sendbird.HttpRespon
 
 	// send request
 	req = reqSendbird
-	res, err := sendbird.FreezeGroupChannel(reqSendbird)
+	res, err := s.SendirdService.FreezeGroupChannel(reqSendbird)
 	if err != nil {
 		fmt.Printf("err: %v \n", err)
 	}
@@ -132,7 +148,7 @@ func FreezeGroupChannel(userID string) (req interface{}, res sendbird.HttpRespon
 	return
 }
 
-func SendWelcomeMessage(userID string) (req interface{}, res sendbird.HttpResponse) {
+func (s *ServiceImpl) SendWelcomeMessage(userID string) (req interface{}, res sendbird.HttpResponse) {
 	reqSendbird := sendbird.SendMessageRequest{
 		MessageType:         "ADMM",
 		ChannelURL:          "evm_info_" + userID,
@@ -145,7 +161,7 @@ func SendWelcomeMessage(userID string) (req interface{}, res sendbird.HttpRespon
 	}
 
 	req = reqSendbird
-	res, err := sendbird.SendMessage(reqSendbird)
+	res, err := s.SendirdService.SendMessage(reqSendbird)
 	if err != nil {
 		fmt.Printf("err: %v \n", err)
 	}
@@ -153,7 +169,7 @@ func SendWelcomeMessage(userID string) (req interface{}, res sendbird.HttpRespon
 }
 
 // BULK
-func BulkCreateGroupChannel(req WorkerRequest) {
+func (s *ServiceImpl) BulkCreateGroupChannel(req WorkerRequest) {
 	funcName := "BulkCreateGroupChannel"
 	log.Info().
 		Str("func", funcName).
@@ -162,7 +178,7 @@ func BulkCreateGroupChannel(req WorkerRequest) {
 	data := req.Users
 	for idx, user := range data {
 		fmt.Printf("idx: %d", idx)
-		reqExt, resExt := CreateGroupChannel(user.UserID)
+		reqExt, resExt := s.CreateGroupChannel(user.UserID)
 
 		// save log
 		dataLog := HttpLog{
@@ -176,12 +192,12 @@ func BulkCreateGroupChannel(req WorkerRequest) {
 	}
 }
 
-func BulkSendWelcomeMessage(req WorkerRequest) {
+func (s *ServiceImpl) BulkSendWelcomeMessage(req WorkerRequest) {
 	funcName := "BulkSendWelcomeMessage"
 	data := req.Users
 	for idx, user := range data {
 		fmt.Print("idx: ", idx)
-		reqExt, resExt := SendWelcomeMessage(user.UserID)
+		reqExt, resExt := s.SendWelcomeMessage(user.UserID)
 
 		// save log
 		dataLog := HttpLog{
