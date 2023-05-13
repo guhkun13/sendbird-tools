@@ -11,6 +11,13 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+var (
+	FuncOnboardingUser     string = "OnboardingUser"
+	FuncCreateGroupChannel string = "CreateGroupChannel"
+	FuncFreezeChannel      string = "FreezeChannel"
+	FuncSendWelcomeMessage string = "SendWelcomeMessage"
+)
+
 func CreateUserList(data [][]string) (res MigratedUserSendbirdList) {
 	for i, line := range data {
 		if i > 0 { // omit header line
@@ -40,27 +47,27 @@ func OnboardingUser(req WorkerRequest) {
 	data := req.Users
 	for idx, user := range data {
 		// [1] Create Channel
-		fmt.Print("idx: ", idx)
+		fmt.Printf("idx: %d||", idx)
 		reqCreateChannel, resCreateChannel := CreateGroupChannel(user.UserID)
 
 		// save log
 		dataLog := HttpLog{
 			Index:    idx,
-			Function: funcName,
+			Function: FuncCreateGroupChannel,
 			Request:  reqCreateChannel,
 			Response: resCreateChannel,
 		}
 		WriteLog(dataLog, req.LogFile)
 		checkDelay()
 
-		// [2] Send Welcome Messsage
+		// [3] Send Welcome Messsage
 		if resCreateChannel.Code == http.StatusOK {
 			reqSendMessage, resSendMessage := SendWelcomeMessage(user.UserID)
 
 			// save log
 			dataLog := HttpLog{
 				Index:    idx,
-				Function: funcName,
+				Function: FuncSendWelcomeMessage,
 				Request:  reqSendMessage,
 				Response: resSendMessage,
 			}
@@ -72,10 +79,10 @@ func OnboardingUser(req WorkerRequest) {
 
 // ONE
 func CreateGroupChannel(userID string) (req interface{}, res sendbird.HttpResponse) {
-	funcName := "CreateGroupChannel"
-	log.Info().
-		Str("func", funcName).
-		Msg("[Main Flow]")
+	// funcName := "CreateGroupChannel"
+	// log.Info().
+	// 	Str("func", funcName).
+	// 	Msg("[Main Flow]")
 
 	userIDint, _ := strconv.ParseInt(userID, 10, 64)
 	reqSendbird := sendbird.CreateGroupChannelRequest{
@@ -132,7 +139,7 @@ func BulkCreateGroupChannel(req WorkerRequest) {
 
 	data := req.Users
 	for idx, user := range data {
-		fmt.Print("idx: ", idx)
+		fmt.Printf("idx: %d", idx)
 		reqExt, resExt := CreateGroupChannel(user.UserID)
 
 		// save log

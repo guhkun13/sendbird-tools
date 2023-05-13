@@ -29,10 +29,11 @@ func GetEndpoints() Endpoints {
 }
 
 func CreateGroupChannel(req CreateGroupChannelRequest) (res HttpResponse, err error) {
-	conf := config.GetSendbirdConfig()
+	funcName := "CreateGroupChannel"
+	fmt.Printf(">> [%s] %s to = %s", funcName, HTTP_POST, req.ChannelURL)
 
+	conf := config.GetSendbirdConfig()
 	postUrl := conf.SendbirdBaseURL + GetEndpoints().CreateGroup
-	fmt.Printf("||| %s to = %s", HTTP_POST, req.ChannelURL)
 
 	jsonData, err := json.Marshal(req)
 	payload := bytes.NewBuffer(jsonData)
@@ -51,11 +52,9 @@ func CreateGroupChannel(req CreateGroupChannelRequest) (res HttpResponse, err er
 	}
 	defer response.Body.Close()
 
-	fmt.Println("||| status:", response.Status)
-	fmt.Println("||| code:", response.StatusCode)
-
 	body, _ := io.ReadAll(response.Body)
-	fmt.Println("response Body:", string(body))
+	fmt.Printf("|| status [%d]: %s \n", response.StatusCode, response.Status)
+	// fmt.Println("response Body:", string(body))
 
 	err = json.Unmarshal(body, &res)
 	if err != nil {
@@ -69,11 +68,12 @@ func CreateGroupChannel(req CreateGroupChannelRequest) (res HttpResponse, err er
 }
 
 func SendMessage(req SendMessageRequest) (res HttpResponse, err error) {
-	conf := config.GetSendbirdConfig()
+	funcName := "SendMessage"
+	fmt.Printf(">> [%s] %s to = %s", funcName, HTTP_POST, req.ChannelURL)
 
+	conf := config.GetSendbirdConfig()
 	postUrl := conf.SendbirdBaseURL + GetEndpoints().SendMessage
 	postUrl = strings.Replace(postUrl, "{channel_url}", req.ChannelURL, -1)
-	fmt.Printf("||| %s to = %s ", HTTP_POST, req.ChannelURL)
 
 	jsonData, err := json.Marshal(req)
 	payload := bytes.NewBuffer(jsonData)
@@ -92,9 +92,8 @@ func SendMessage(req SendMessageRequest) (res HttpResponse, err error) {
 	}
 	defer response.Body.Close()
 
-	fmt.Println("||| status:", response.Status)
-	// fmt.Println("response Headers:", response.Header)
 	body, _ := io.ReadAll(response.Body)
+	fmt.Printf("|| status [%d]: %s \n", response.StatusCode, response.Status)
 	// fmt.Println("response Body:", string(body))
 
 	err = json.Unmarshal(body, &res)
