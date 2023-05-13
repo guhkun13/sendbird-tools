@@ -11,6 +11,11 @@ Kini, kamu makin mudah dapatkan info menarik terkait Evermos. Info yang akan did
 Salam Sungkem dari Kami,
 Seluruh Tim Evermos`
 
+const (
+	SendbirdProfileURL     string = "https://evermos.com/placeholder-profile.png"
+	SendbirdGroupCoverlURL string = "https://evermos-staging.s3-ap-southeast-1.amazonaws.com/chat/group/official/default-image.png"
+)
+
 type MigratedUserSendbird struct {
 	UserID string
 	// FullName string

@@ -13,9 +13,8 @@ const (
 )
 
 const (
-	SendbirdProfileURL string = "https://evermos.com/placeholder-profile.png"
-	SendbirdBaseURL    string = "SENDBIRD.BASE_URL"
-	SendbirdAPIToken   string = "SENDBIRD.API_TOKEN"
+	SendbirdBaseURL  string = "SENDBIRD.BASE_URL"
+	SendbirdAPIToken string = "SENDBIRD.API_TOKEN"
 )
 
 type AppConfig struct {

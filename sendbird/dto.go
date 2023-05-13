@@ -78,6 +78,11 @@ type SendMessageRequest struct {
 	MarkAsRead          string `json:"mark_as_read,omitempty"`
 }
 
+type FreezeGroupChannelRequest struct {
+	ChannelURL string `json:"channel_url"`
+	Freeze     bool   `json:"freeze"`
+}
+
 type SendMessageResponse struct {
 	Status string `json:"status"`
 	// Type       string `json:"type"`

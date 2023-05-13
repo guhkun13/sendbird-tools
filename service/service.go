@@ -40,24 +40,35 @@ func CreateUserList(data [][]string) (res MigratedUserSendbirdList) {
 // [3] send welcome message
 func OnboardingUser(req WorkerRequest) {
 	funcName := "OnboardingUser"
-	log.Info().
-		Str("func", funcName).
-		Msg("[Main Flow]")
+	log.Info().Str("func", funcName).Msg("[Main Flow]")
 
 	data := req.Users
 	for idx, user := range data {
-		// [1] Create Channel
-		fmt.Printf("idx: %d||", idx)
+		fmt.Printf("[ idx: %d | userID: %s ] \n", idx, user.UserID)
+
+		// [1] Create Group Channel
 		reqCreateChannel, resCreateChannel := CreateGroupChannel(user.UserID)
 
 		// save log
-		dataLog := HttpLog{
+		logCreate := HttpLog{
 			Index:    idx,
 			Function: FuncCreateGroupChannel,
 			Request:  reqCreateChannel,
 			Response: resCreateChannel,
 		}
-		WriteLog(dataLog, req.LogFile)
+		WriteLog(logCreate, req.LogFile)
+		checkDelay()
+
+		// [2] Freeze Group Channel
+		reqFreezeChannel, resFreezeChannel := FreezeGroupChannel(user.UserID)
+		// save log
+		logFreeze := HttpLog{
+			Index:    idx,
+			Function: FuncFreezeChannel,
+			Request:  reqFreezeChannel,
+			Response: resFreezeChannel,
+		}
+		WriteLog(logFreeze, req.LogFile)
 		checkDelay()
 
 		// [3] Send Welcome Messsage
@@ -65,13 +76,13 @@ func OnboardingUser(req WorkerRequest) {
 			reqSendMessage, resSendMessage := SendWelcomeMessage(user.UserID)
 
 			// save log
-			dataLog := HttpLog{
+			logSend := HttpLog{
 				Index:    idx,
 				Function: FuncSendWelcomeMessage,
 				Request:  reqSendMessage,
 				Response: resSendMessage,
 			}
-			WriteLog(dataLog, req.LogFile)
+			WriteLog(logSend, req.LogFile)
 			checkDelay()
 		}
 	}
@@ -88,6 +99,7 @@ func CreateGroupChannel(userID string) (req interface{}, res sendbird.HttpRespon
 	reqSendbird := sendbird.CreateGroupChannelRequest{
 		Name:       "Evermos Info",
 		ChannelURL: "evm_info_" + userID,
+		CoverURL:   SendbirdGroupCoverlURL,
 		CustomType: "evm_info",
 		IsDistinct: false,
 		UserIDs:    []int64{userIDint},
@@ -104,13 +116,23 @@ func CreateGroupChannel(userID string) (req interface{}, res sendbird.HttpRespon
 	return
 }
 
-func SendWelcomeMessage(userID string) (req interface{}, res sendbird.HttpResponse) {
-	funcName := "SendWelcomeMessage"
-	log.Info().
-		Str("func", funcName).
-		Msg("[Main Flow]")
+func FreezeGroupChannel(userID string) (req interface{}, res sendbird.HttpResponse) {
+	reqSendbird := sendbird.FreezeGroupChannelRequest{
+		ChannelURL: "evm_info_" + userID,
+		Freeze:     true,
+	}
 
-	// prepare request
+	// send request
+	req = reqSendbird
+	res, err := sendbird.FreezeGroupChannel(reqSendbird)
+	if err != nil {
+		fmt.Printf("err: %v \n", err)
+	}
+
+	return
+}
+
+func SendWelcomeMessage(userID string) (req interface{}, res sendbird.HttpResponse) {
 	reqSendbird := sendbird.SendMessageRequest{
 		MessageType:         "ADMM",
 		ChannelURL:          "evm_info_" + userID,
