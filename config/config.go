@@ -49,7 +49,7 @@ func InitConfig() (conf Config) {
 	conf.Sendbird.BaseURL = os.Getenv(SendbirdBaseURL)
 	conf.Sendbird.APIToken = os.Getenv(SendbirdAPIToken)
 	// evermos
-	conf.Evermos.EvmChat.BaseURL = os.Getenv(SendbirdBaseURL)
+	conf.Evermos.EvmChat.BaseURL = os.Getenv(EvermosEvmChatBaseURL)
 
 	return
 }
