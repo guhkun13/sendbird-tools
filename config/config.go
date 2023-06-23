@@ -18,6 +18,11 @@ type Config struct {
 		BaseURL  string
 		APIToken string
 	}
+	Evermos struct {
+		EvmChat struct {
+			BaseURL string
+		}
+	}
 }
 
 var (
@@ -27,6 +32,8 @@ var (
 	// sendbird
 	SendbirdBaseURL  string = "SENDBIRD.BASE_URL"
 	SendbirdAPIToken string = "SENDBIRD.API_TOKEN"
+	// evermos
+	EvermosEvmChatBaseURL string = "EVERMOS.EVM_CHAT.BASE_URL"
 )
 
 func InitConfig() (conf Config) {
@@ -41,7 +48,8 @@ func InitConfig() (conf Config) {
 	// sendbird
 	conf.Sendbird.BaseURL = os.Getenv(SendbirdBaseURL)
 	conf.Sendbird.APIToken = os.Getenv(SendbirdAPIToken)
+	// evermos
+	conf.Evermos.EvmChat.BaseURL = os.Getenv(EvermosEvmChatBaseURL)
 
 	return
-
 }

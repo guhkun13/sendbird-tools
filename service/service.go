@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/guhkun13/sendbird-tools/config"
+	evmchat "github.com/guhkun13/sendbird-tools/evm-chat"
 	"github.com/guhkun13/sendbird-tools/sendbird"
 )
 
@@ -19,13 +20,15 @@ type Service interface {
 }
 
 type ServiceImpl struct {
-	Config         config.Config
-	SendirdService sendbird.Service
+	Config             config.Config
+	SendirdService     sendbird.Service
+	EvermosChatService evmchat.Service
 }
 
 func InitService() *ServiceImpl {
 	return &ServiceImpl{
-		Config:         config.InitConfig(),
-		SendirdService: sendbird.InitService(),
+		Config:             config.InitConfig(),
+		SendirdService:     sendbird.InitService(),
+		EvermosChatService: evmchat.InitService(),
 	}
 }
