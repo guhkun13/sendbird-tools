@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-
-	"github.com/rs/zerolog/log"
 )
 
 func (s *ServiceImpl) JoinSuperGroup(req JoinSuperGroupRequest) (res JoinSuperGroupResponse, err error) {
@@ -37,8 +35,6 @@ func (s *ServiceImpl) JoinSuperGroup(req JoinSuperGroupRequest) (res JoinSuperGr
 	if err != nil {
 		fmt.Println("Cannont unmarshal response")
 	}
-
-	log.Info().Interface("res", res).Msg("[JoinSuperGroupResponse]")
 
 	return
 }

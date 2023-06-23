@@ -9,9 +9,13 @@ type JoinSuperGroupRequest struct {
 	UserID     string `json:"user_id"`
 }
 
-type JoinSuperGroupResponse struct {
+type JoinSuperGroup struct {
 	ChannelName string `json:"channel_name"`
 	ChannelURL  string `json:"channel_url"`
 	CustomType  string `json:"custom_type"`
 	MemberCount int    `json:"member_count"`
+}
+
+type JoinSuperGroupResponse struct {
+	Data JoinSuperGroup `json:"data"`
 }
