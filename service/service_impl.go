@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 
+	evmchat "github.com/guhkun13/sendbird-tools/evm-chat"
 	"github.com/guhkun13/sendbird-tools/sendbird"
 	"github.com/rs/zerolog/log"
 )
@@ -14,6 +15,7 @@ var (
 	FuncOnboardingUser     string = "OnboardingUser"
 	FuncCreateGroupChannel string = "CreateGroupChannel"
 	FuncFreezeChannel      string = "FreezeChannel"
+	FuncJoinSuperGroup     string = "JoinSuperGroup"
 	FuncSendWelcomeMessage string = "SendWelcomeMessage"
 )
 
@@ -34,9 +36,10 @@ func (s *ServiceImpl) CreateUserList(data [][]string) (res MigratedUserSendbirdL
 }
 
 // onboarding:
-// [1] create channel,
-// [2] freeze channel,
-// [3] send welcome message
+// [1] create private channel evm_info
+// [2] freeze channel evm_info
+// [3] send welcome message to evm_info
+// [4] join super group evm_promo (optional)
 func (s *ServiceImpl) OnboardingUser(req WorkerRequest) {
 	funcName := "OnboardingUser"
 	log.Info().Str("func", funcName).Msg("[Main Flow]")
@@ -80,6 +83,18 @@ func (s *ServiceImpl) OnboardingUser(req WorkerRequest) {
 			}
 			s.WriteLog(logSend, req.LogFile)
 		}
+
+		// [4] Join Super Group Evermos Promo - Optional
+		reqJoin, resJoin := s.JoinSuperGroup(user.UserID)
+		// save log
+		logJoin := HttpLog{
+			Index:    idx,
+			Function: FuncJoinSuperGroup,
+			Request:  reqJoin,
+			Response: resJoin,
+		}
+		s.WriteLog(logJoin, req.LogFile)
+
 		// check for delay
 		s.CheckDelay()
 	}
@@ -144,6 +159,22 @@ func (s *ServiceImpl) SendWelcomeMessage(userID string) (req interface{}, res se
 	return
 }
 
+func (s *ServiceImpl) JoinSuperGroup(userID string) (req interface{}, res evmchat.JoinSuperGroupResponse) {
+
+	reqJoin := evmchat.JoinSuperGroupRequest{
+		CustomType: evmchat.ChannelEvermosPromo,
+		UserID:     userID,
+	}
+
+	req = reqJoin
+	res, err := s.EvermosChatService.JoinSuperGroup(reqJoin)
+	if err != nil {
+		fmt.Printf("err: %v \n", err)
+	}
+
+	return
+}
+
 // BULK
 func (s *ServiceImpl) BulkCreateGroupChannel(req WorkerRequest) {
 	funcName := "BulkCreateGroupChannel"
@@ -186,6 +217,8 @@ func (s *ServiceImpl) BulkSendWelcomeMessage(req WorkerRequest) {
 		s.CheckDelay()
 	}
 }
+
+// END of BULK function
 
 func (s *ServiceImpl) CheckDelay() {
 	isDelay, _ := strconv.ParseBool(s.Config.App.Delay.Enabled)
